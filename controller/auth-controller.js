@@ -1,11 +1,26 @@
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import gravatar from 'gravatar';
+import fs from 'fs/promises';
+import path from 'path';
 import User from "../models/User.js";
 import ctrlWrapper from '../decorators/ctrlWrapper.js';
 import HttpError from '../helper/HttpError.js';
-import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
 const { JWT_SECRET } = process.env;
+
+const avatarsPath = path.resolve('public', 'avatars');
+
+const changeAvatar = async (req, res) => {
+    const { _id } = req.user;
+    const { path: oldPath, filename } = req.file;
+    const newPath = path.join(avatarsPath, filename);
+    await fs.rename(oldPath, newPath);
+    const avatarURL = path.join('avatars', filename);
+    await User.findByIdAndUpdate(_id, {avatarURL});
+    res.json({avatarURL});
+};
 
 const register = async (req, res) => {
     const { email, password } = req.body;
@@ -14,7 +29,8 @@ const register = async (req, res) => {
         throw HttpError(409, 'Email in use');
     }
     const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({...req.body, password: hashPassword});
+    const avatarURL = gravatar.url(email);
+    const newUser = await User.create({...req.body, avatarURL, password: hashPassword});
     res.json({
         'user': {
             'email': newUser.email,
@@ -64,6 +80,7 @@ const logout = async (req, res) => {
 };
 
 export default {
+    changeAvatar: ctrlWrapper(changeAvatar),
     register: ctrlWrapper(register),
     login: ctrlWrapper(login),
     getCurrent: ctrlWrapper(getCurrent),

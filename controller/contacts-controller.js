@@ -1,7 +1,5 @@
-import fs from 'fs/promises';
-import path from 'path';
 import ctrlWrapper from '../decorators/ctrlWrapper.js';
-import {HttpError} from '../helper/index.js';
+import HttpError from '../helper/HttpError.js';
 import Contact from '../models/Contact.js';
 
 const getAll = async (req, res) => {
@@ -22,11 +20,8 @@ const getById = async (req, res) => {
 
 const addNew = async (req, res) => {
     const { _id: owner } = req.user;
-    console.log(req.body);
-    console.log(req.file);    
-
-    // const result = await Contact.create({...req.body, owner});
-    // res.status(201).json(result);
+    const result = await Contact.create({...req.body, owner});
+    res.status(201).json(result);
 };
 
 const deleteById = async (req, res) => {
