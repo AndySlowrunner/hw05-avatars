@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import gravatar from 'gravatar';
 import fs from 'fs/promises';
 import path from 'path';
+import jimp from 'jimp';
 import User from "../models/User.js";
 import ctrlWrapper from '../decorators/ctrlWrapper.js';
 import HttpError from '../helper/HttpError.js';
@@ -17,6 +18,17 @@ const changeAvatar = async (req, res) => {
     const { path: oldPath, filename } = req.file;
     const newPath = path.join(avatarsPath, filename);
     await fs.rename(oldPath, newPath);
+
+    jimp.read(newPath)
+        .then((filename) => {
+            return filename
+                .resize(250, 250)
+                .write(newPath);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+
     const avatarURL = path.join('avatars', filename);
     await User.findByIdAndUpdate(_id, {avatarURL});
     res.json({avatarURL});

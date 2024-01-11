@@ -1,5 +1,5 @@
-import multer from "multer";
-import path from "path";
+import multer from 'multer';
+import path from 'path';
 
 import HttpError from '../helper/HttpError.js';
 
@@ -21,7 +21,7 @@ const limits = {
 const fileFilter = (req, file, callback) => {
     const extention = req.originalname.split('.').pop();
     if (extention === 'exe') {
-        callback(HttpError(400, '.exe is not valid extention'))
+        callback(HttpError(400, '.exe not valid extention'))
     }
 };
 
