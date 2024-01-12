@@ -15,6 +15,9 @@ const avatarsPath = path.resolve('public', 'avatars');
 
 const changeAvatar = async (req, res) => {
     const { _id } = req.user;
+    if (!req.file) {
+        throw HttpError(400, 'Please add an image')
+    };
     const { path: oldPath, filename } = req.file;
     const newPath = path.join(avatarsPath, filename);
     await fs.rename(oldPath, newPath);
